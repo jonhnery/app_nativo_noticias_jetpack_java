@@ -1,32 +1,52 @@
 package me.dio.soccernews.ui.news;
 
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import java.util.ArrayList;
 import java.util.List;
 
+import me.dio.soccernews.data.remote.soccerNewsAPI;
 import me.dio.soccernews.doMain.News;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class NewsViewModel extends ViewModel {
 
-    private final MutableLiveData<List<News>> news ;
+    private final MutableLiveData<List<News>> news = new MutableLiveData<>();
+    private final soccerNewsAPI api;
 
     public NewsViewModel() {
-        this.news = new MutableLiveData<>();
-
-        //TODO Remover Mock de Notícias
-       List<News> news = new ArrayList<>();
-       news.add(new News("Bahia vai para cima","Finally, make sure to make the behavior is accessible by setting an AccessibilityDelegate on the card. The following shows an example of allowing the user to move the card to two different positions on the screen."));
-       news.add(new News("Bahia joga no sábado","Finally, make sure to make the behavior is accessible by setting an AccessibilityDelegate on the card. The following shows an example of allowing the user to move the card to two different positions on the screen."));
-       news.add(new News("Vitória quer revanche","Finally, make sure to make the behavior is accessible by setting an AccessibilityDelegate on the card. The following shows an example of allowing the user to move the card to two different positions on the screen."));
-
-       this.news.setValue(news);
-
-
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("https://jonhnery.github.io/api_nativo_noticias_jetpack_java/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        api = retrofit.create(soccerNewsAPI.class);
+        this.findNews();
     }
 
-    public MutableLiveData<List<News>> getNews() {
+    private void findNews() {
+        api.getNews().enqueue(new Callback<List<News>>() {
+            @Override
+            public void onResponse(Call<List<News>> call, Response<List<News>> response) {
+                if (response.isSuccessful()) {
+                    news.setValue(response.body());
+                } else {
+                    //TODO Pensar em uma estratégia de tratamento de erros.
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<News>> call, Throwable t) {
+                //TODO Pensar em uma estratégia de tratamento de erros.
+            }
+        });
+    }
+
+    public LiveData<List<News>> getNews() {
         return this.news;
     }
 }
