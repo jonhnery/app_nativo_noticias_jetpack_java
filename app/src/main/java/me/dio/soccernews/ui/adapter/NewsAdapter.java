@@ -2,10 +2,12 @@ package me.dio.soccernews.ui.adapter;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.squareup.picasso.Picasso;
@@ -31,15 +33,19 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.ViewHolder> {
     return new ViewHolder(binding);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         News news = this.news.get(position);
         holder.binding.tvtitle.setText(news.getTitle());
         holder.binding.tvdescription.setText(news.getDescription());
         Picasso.get().load(news.getImage()).fit().into(holder.binding.ivThummail);
-        Intent i = new Intent(Intent.ACTION_VIEW);
-        i.setData(Uri.parse(news.getLink()));
-        holder.itemView.getContext().startActivity(i);
+        holder.binding.btopenlink.setOnClickListener(view -> {
+            Intent i = new Intent(Intent.ACTION_VIEW);
+            i.setData(Uri.parse(news.getLink()));
+            holder.itemView.getContext().startActivity(i);
+            });
+
     }
 
     @Override
